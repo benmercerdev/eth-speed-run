@@ -4,19 +4,23 @@ pragma solidity >=0.8.0 <0.9.0;
 import "hardhat/console.sol";
 //import "@openzeppelin/contracts/access/Ownable.sol"; //https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol
 
-contract YourContract {
-  event SetPurpose(address sender, string purpose);
+contract A {
+    function foo() public pure virtual returns (string memory) {
+        return "A";
+    }
+}
 
-  string public purpose = "Building Unstoppable Apps!!!";
+contract B is A {
+    function foo() public pure virtual override returns (string memory) {
+        return "B";
+    }
+}
 
-  constructor() {
-    emit SetPurpose(msg.sender, "Constructed!");
-    // what should we do on deploy?
-  }
+contract YourContract is A, B {
 
-  function setPurpose(string memory newPurpose) public {
-      purpose = newPurpose;
-      console.log(msg.sender,"set purpose to",purpose);
-      emit SetPurpose(msg.sender, purpose);
-  }
+  function foo() public pure override(A, B) returns (string memory) {
+        return super.foo();
+    }
+
+  
 }
