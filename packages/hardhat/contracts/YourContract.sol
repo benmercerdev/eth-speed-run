@@ -4,23 +4,56 @@ pragma solidity >=0.8.0 <0.9.0;
 import "hardhat/console.sol";
 //import "@openzeppelin/contracts/access/Ownable.sol"; //https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol
 
-contract A {
-    function foo() public pure virtual returns (string memory) {
-        return "A";
-    }
-}
 
-contract B is A {
-    function foo() public pure virtual override returns (string memory) {
-        return "B";
-    }
-}
+contract YourContract {
 
-contract YourContract is A, B {
+   // Payable address can receive Ether
+    address payable public owner;
 
-  function foo() public pure override(A, B) returns (string memory) {
-        return super.foo();
+    event SetPurpose(address sender, address purpose);
+
+    // Payable constructor can receive Ether
+    constructor() payable {
+        owner = payable(msg.sender);
     }
 
+    function getOwner() payable public returns (address){
+      emit SetPurpose(msg.sender, owner);
+      return owner;
+    } 
+
+    // Function to deposit Ether into this contract.
+    // Call this function along with some Ether.
+    // The balance of this contract will be automatically updated.
+    function deposit() public payable {}
+
+    // Call this function along with some Ether.
+    // The function will throw an error since this function is not payable.
+    function notPayable() public {}
+
+    // Function to withdraw all Ether from this contract.
+    function withdraw() public {
+        // get the amount of Ether stored in this contract
+        uint amount = address(this).balance;
+
+        // send all Ether to owner
+        // Owner can receive Ether since the address of owner is payable
+        (bool success, ) = owner.call{value: amount}("");
+        require(success, "Failed to send Ether");
+    }
+
+    // Function to transfer Ether from this contract to address from input
+    function transfer(address payable _to, uint _amount) public {
+        // Note that "to" is declared as payable
+        (bool success, ) = _to.call{value: _amount}("");
+        require(success, "Failed to send Ether");
+    }
+
+    // (Should fail, except for Owner address)Function to transfer Ether from this contract to address from input 
+    function transferFail(address _to, uint _amount) public {
+        // Note "to" is NOT declared as payable
+        (bool success, ) = _to.call{value: _amount}("");
+        require(success, "Failed to send Ether");
+    }
   
 }
